@@ -12,13 +12,13 @@ const server = http.createServer(app);
 const io = socketio(server);
 
 const db = require("./db");
-const { Connection, Request } = require("tedious");
+const { Connection, Request, TYPES } = require("tedious");
 const { userName, password } = db.authentication.options;
 
 app.use(router);
 app.use(cors());
 
-const publicPath = path.join(__dirname, "dist");
+const publicPath = path.join(__dirname, "/dist");
 
 app.use(express.static(path.join(publicPath)));
 
@@ -31,6 +31,10 @@ console.log(publicPath);
 io.on("connect", (socket) => {
   const connection = new Connection(db);
 
+  // Storage
+  let colNames = [];
+  let values = [];
+
   socket.on("join", ({ name, pass }, callback) => {
     if (name !== userName || pass !== password) {
       socket.disconnect();
@@ -42,18 +46,17 @@ io.on("connect", (socket) => {
       else queryDatabase();
     });
 
-    socket.on("getRequest", (sqlRequest) => queryDatabase(sqlRequest));
-
-    const queryDatabase = (sqlRequest = "select * from DIEM") => {
-      // Storage
-      let colNames = [];
-      let values = [];
-
+    const queryDatabase = (sqlRequest = "select * from KHOA") => {
       // Read all rows from table
-      const request = new Request(sqlRequest, (err, rowCount) => {
+      const request = new Request(sqlRequest, (err) => {
         if (err) console.error(err.message);
-        else console.log(`${rowCount} row(s) returned`);
+        else {
+          colNames = [];
+          values = [];
+        }
       });
+
+      socket.on("getRequest", (sqlRequest) => queryDatabase(sqlRequest));
 
       request.on("row", (columns) => {
         columns.forEach((column) => {
@@ -67,6 +70,38 @@ io.on("connect", (socket) => {
 
       connection.execSql(request);
     };
+
+    socket.on("insertSql", (sqlRequest, editObj) => {
+      const editConnect = new Connection(db);
+      editConnect.on("connect", (err) => {
+        if (err) console.error(err.message);
+        else {
+          console.log(sqlRequest);
+          const options = { keepNulls: true };
+          const bulkLoad = editConnect.newBulkLoad(
+            sqlRequest,
+            options,
+            (error, rowCount) => {
+              console.log("inserted %d rows", rowCount);
+              queryDatabase();
+            }
+          );
+
+          bulkLoad.addColumn("MAKH", TYPES.Char, {
+            nullable: false,
+            length: 10,
+          });
+          bulkLoad.addColumn("TENKH", TYPES.NVarChar, {
+            length: 31,
+            nullable: false,
+          });
+
+          bulkLoad.addRow(editObj);
+
+          editConnect.execBulkLoad(bulkLoad);
+        }
+      });
+    });
   });
 });
 
