@@ -77,7 +77,7 @@ io.on("connect", (socket) => {
         if (err) console.error(err.message);
         else {
           console.log(sqlRequest);
-          const options = { keepNulls: true };
+          const options = { checkConstraints: true };
           const bulkLoad = editConnect.newBulkLoad(
             sqlRequest,
             options,
@@ -87,14 +87,137 @@ io.on("connect", (socket) => {
             }
           );
 
-          bulkLoad.addColumn("MAKH", TYPES.Char, {
-            nullable: false,
-            length: 10,
-          });
-          bulkLoad.addColumn("TENKH", TYPES.NVarChar, {
-            length: 31,
-            nullable: false,
-          });
+          // KHOA
+          if (sqlRequest === "KHOA") {
+            bulkLoad.addColumn("MAKH", TYPES.Char, {
+              nullable: false,
+              length: 10,
+            });
+
+            bulkLoad.addColumn("TENKH", TYPES.NVarChar, {
+              length: 31,
+              nullable: false,
+            });
+          } else if (sqlRequest === "LOP") {
+            bulkLoad.addColumn("MALOP", TYPES.Char, {
+              nullable: false,
+              length: 10,
+            });
+
+            bulkLoad.addColumn("TENLOP", TYPES.NVarChar, {
+              length: 51,
+              nullable: false,
+            });
+
+            bulkLoad.addColumn("SISO", TYPES.Int, {
+              nullable: false,
+            });
+
+            bulkLoad.addColumn("LOPTRUONG", TYPES.NVarChar, {
+              length: 31,
+              nullable: true,
+            });
+
+            bulkLoad.addColumn("MAKH", TYPES.Char, {
+              length: 10,
+              nullable: false,
+            });
+          } else if (sqlRequest === "SINHVIEN") {
+            bulkLoad.addColumn("MASV", TYPES.Char, {
+              nullable: false,
+              length: 10,
+            });
+
+            bulkLoad.addColumn("HOTEN", TYPES.NVarChar, {
+              length: 31,
+              nullable: false,
+            });
+
+            bulkLoad.addColumn("NGSINH", TYPES.Date, {
+              nullable: true,
+            });
+
+            bulkLoad.addColumn("GTINH", TYPES.NVarChar, {
+              length: 10,
+              nullable: true,
+            });
+
+            bulkLoad.addColumn("DCHI", TYPES.NVarChar, {
+              length: 51,
+              nullable: true,
+            });
+
+            bulkLoad.addColumn("MALOP", TYPES.Char, {
+              nullable: false,
+              length: 10,
+            });
+          } else if (sqlRequest === "GIANGVIEN") {
+            bulkLoad.addColumn("MAGV", TYPES.Char, {
+              nullable: false,
+              length: 10,
+            });
+
+            bulkLoad.addColumn("TENGV", TYPES.NVarChar, {
+              length: 31,
+              nullable: false,
+            });
+
+            bulkLoad.addColumn("MAKH", TYPES.Char, {
+              length: 10,
+              nullable: false,
+            });
+          } else if (sqlRequest === "MONHOC") {
+            bulkLoad.addColumn("MAMH", TYPES.Char, {
+              nullable: false,
+              length: 10,
+            });
+
+            bulkLoad.addColumn("TENMH", TYPES.NVarChar, {
+              length: 31,
+              nullable: false,
+            });
+
+            bulkLoad.addColumn("SOTC", TYPES.Int, {
+              nullable: true,
+            });
+          } else if (sqlRequest === "DIEM") {
+            bulkLoad.addColumn("MASV", TYPES.Char, {
+              nullable: false,
+              length: 10,
+            });
+
+            bulkLoad.addColumn("MAMH", TYPES.Char, {
+              nullable: false,
+              length: 10,
+            });
+
+            bulkLoad.addColumn("LANTHI", TYPES.Int, {
+              nullable: true,
+            });
+
+            bulkLoad.addColumn("DIEMTHI", TYPES.Float, {
+              nullable: true,
+            });
+          } else {
+            bulkLoad.addColumn("MAGV", TYPES.Char, {
+              nullable: false,
+              length: 10,
+            });
+
+            bulkLoad.addColumn("MAMH", TYPES.Char, {
+              nullable: false,
+              length: 10,
+            });
+
+            bulkLoad.addColumn("NAMHOC", TYPES.Char, {
+              length: 20,
+              nullable: true,
+            });
+
+            bulkLoad.addColumn("HOCKI", TYPES.Int, {
+              nullable: true,
+            });
+          }
 
           bulkLoad.addRow(editObj);
 
