@@ -18,7 +18,7 @@ const { userName, password } = db.authentication.options;
 app.use(router);
 app.use(cors());
 
-const publicPath = path.join(__dirname, "/dist");
+const publicPath = path.join(__dirname, "../client/dist");
 
 app.use(express.static(path.join(publicPath)));
 
@@ -72,6 +72,7 @@ io.on("connect", (socket) => {
     };
 
     socket.on("insertSql", (sqlRequest, editObj) => {
+      console.log(editObj);
       const editConnect = new Connection(db);
       editConnect.on("connect", (err) => {
         if (err) console.error(err.message);
