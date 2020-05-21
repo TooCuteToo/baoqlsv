@@ -232,23 +232,35 @@ io.on("connect", (socket) => {
     });
 
     socket.on("removeSql", (sqlRequest, editObj) => {
+      console.log(sqlRequest);
       const editConnect = new Connection(db);
       editConnect.on("connect", (err) => {
         if (err) console.error(err.message);
         else {
-          const options = { checkConstraints: true };
-          const bulkLoad = editConnect.newBulkLoad(
-            sqlRequest,
-            options,
-            (error, rowCount) => {
-              console.log("inserted %d rows", rowCount);
-              queryDatabase();
+          const request = new Request(
+            `DELETE FROM ${sqlRequest} where ${
+              Object.keys(editObj)[0]
+            }=@removeCondition`,
+            (err) => {
+              if (err) console.error(err.message);
             }
           );
 
-          bulkLoad.addRow(editObj);
+          if (sqlRequest === "KHOA")
+            request.addParameter("removeCondition", TYPES.Char, editObj.MAKH);
+          else if (sqlRequest === "LOP")
+            request.addParameter("removeCondition", TYPES.Char, editObj.MALOP);
+          else if (sqlRequest === "SINHVIEN")
+            request.addParameter("removeCondition", TYPES.Char, editObj.MASV);
+          else if (sqlRequest === "GIANGVIEN")
+            request.addParameter("removeCondition", TYPES.Char, editObj.MAGV);
+          else if (sqlRequest === "MONHOC")
+            request.addParameter("removeCondition", TYPES.Char, editObj.MAMH);
+          else
+            request.addParameter("removeCondition", TYPES.Char, editObj.MASV);
 
-          editConnect.execBulkLoad(bulkLoad);
+          editConnect.execSql(request);
+          queryDatabase(sqlRequest);
         }
       });
     });
