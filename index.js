@@ -58,11 +58,16 @@ io.on("connect", (socket) => {
 
       socket.on("getRequest", (sqlRequest) => queryDatabase(sqlRequest));
 
+      request.on("columnMetadata", (columns) => {
+        columns.forEach((column) => {
+          const { colName } = column;
+          colNames = [...colNames, colName];
+        });
+      });
+
       request.on("row", (columns) => {
         columns.forEach((column) => {
-          const { colName } = column.metadata;
           const { value } = column;
-          colNames = [...new Set([...colNames, colName])];
           values = [...values, value];
           socket.emit("getData", { colNames, values });
         });
@@ -72,13 +77,12 @@ io.on("connect", (socket) => {
     };
 
     socket.on("insertSql", (sqlRequest, editObj) => {
-      console.log(editObj);
       const editConnect = new Connection(db);
       editConnect.on("connect", (err) => {
         if (err) console.error(err.message);
         else {
-          console.log(sqlRequest);
           const options = { checkConstraints: true };
+
           const bulkLoad = editConnect.newBulkLoad(
             sqlRequest,
             options,
@@ -219,6 +223,28 @@ io.on("connect", (socket) => {
               nullable: true,
             });
           }
+
+          bulkLoad.addRow(editObj);
+
+          editConnect.execBulkLoad(bulkLoad);
+        }
+      });
+    });
+
+    socket.on("removeSql", (sqlRequest, editObj) => {
+      const editConnect = new Connection(db);
+      editConnect.on("connect", (err) => {
+        if (err) console.error(err.message);
+        else {
+          const options = { checkConstraints: true };
+          const bulkLoad = editConnect.newBulkLoad(
+            sqlRequest,
+            options,
+            (error, rowCount) => {
+              console.log("inserted %d rows", rowCount);
+              queryDatabase();
+            }
+          );
 
           bulkLoad.addRow(editObj);
 
