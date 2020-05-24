@@ -18,7 +18,7 @@ const { userName, password } = db.authentication.options;
 app.use(router);
 app.use(cors());
 
-const publicPath = path.join(__dirname, "../client/dist");
+const publicPath = path.join(__dirname, "/dist");
 
 app.use(express.static(path.join(publicPath)));
 
