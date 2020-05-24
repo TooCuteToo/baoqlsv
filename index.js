@@ -88,7 +88,6 @@ io.on("connect", (socket) => {
             options,
             (error, rowCount) => {
               console.log("inserted %d rows", rowCount);
-              queryDatabase();
             }
           );
 
@@ -260,7 +259,6 @@ io.on("connect", (socket) => {
             request.addParameter("removeCondition", TYPES.Char, editObj.MASV);
 
           editConnect.execSql(request);
-          queryDatabase(sqlRequest);
         }
       });
     });

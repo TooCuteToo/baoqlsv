@@ -116,6 +116,20 @@ input[type="submit"]:hover {
   margin: 7em auto;
 }
 
+input[type="date"] {
+  display: block;
+  width: 20%;
+  height: 44px;
+}
+
+input[value="Delete"] {
+  background: #e55039;
+}
+
+input[value="Delete"]:hover {
+  background: #eb2f06;
+}
+
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap");
 
 :root {
